@@ -40,13 +40,21 @@ var level1 = (function(){
       game.load.image('sky', '/assets/sky.png');
       game.load.image('pipe', '/assets/pipe.png');
       game.load.spritesheet('dude', '/assets/dude.png', 32, 48);
+      game.load.audio('jump', '/assets/pusher.wav');
+      game.load.audio('song', '/assets/music.mp3');
     },
     create: function(){
       game.physics.startSystem(Phaser.Physics.ARCADE);
 
+      o.l.jumpSound = game.add.audio('jump');
+      o.l.song = game.add.audio('song');
+      o.l.song.loop = true;
+      o.l.song.play();
+
       game.add.sprite(0, 0, 'sky');
 
       o.l.dude = game.add.sprite(10,10, 'dude');
+      o.l.dude.anchor.setTo(-0.2, 0.5);
       o.l.dude.animations.add('right', [5, 6, 7, 8], 10, true);
       game.physics.arcade.enable(o.l.dude);
       o.l.dude.body.gravity.y = 1000;
@@ -56,12 +64,12 @@ var level1 = (function(){
 
       o.l.pipes = game.add.group();
       o.l.pipes.enableBody = true;
-      o.l.pipes.createMultiple(20, 'pipe');
+      o.l.pipes.createMultiple(50, 'pipe');
 
       o.l.score = 0;
       o.l.txtScore = game.add.text(20, 20, "0", { font: "30px Arial", fill: "#ffffff" });
 
-      game.time.events.loop(1500, o.l.addRowOfPipes);
+      game.time.events.loop(1000, o.l.addRowOfPipes);
     },
     update: function(){
       if(!o.l.dude.inWorld)
@@ -74,10 +82,13 @@ var level1 = (function(){
 
   o.l.gameOver = function(){
     game.state.restart();
+    o.l.song.destroy();
   };
 
   o.l.jump = function(){
+    game.add.tween(o.l.dude).to({angle: -20}, 100).start();
     o.l.dude.body.velocity.y = -350;
+    o.l.jumpSound.play();
   };
 
   o.l.addRowOfPipes = function(){
@@ -85,7 +96,7 @@ var level1 = (function(){
     o.l.txtScore.text = o.l.score;
 
     var hole = Math.floor(Math.random() * 5) + 1;
-    for (var i = 0; i < 8; i++)
+    for (var i = 0; i < 10; i++)
       if (i != hole && i != hole + 1)
         o.l.addOnePipe(400, i * 60 + 10);
   };
